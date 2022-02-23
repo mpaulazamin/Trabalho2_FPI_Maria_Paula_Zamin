@@ -39,6 +39,8 @@ private slots:
     void on_spinBoxBrightness_valueChanged(int arg1);
     void on_spinBoxContrast_valueChanged(int arg1);
 
+    void on_pushButtonGaussian_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

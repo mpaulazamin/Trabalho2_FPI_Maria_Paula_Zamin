@@ -208,7 +208,14 @@
         <item>
          <widget class="QPushButton" name="pushButtonSaveNewImage">
           <property name="text">
-           <string>Save New Image</string>
+           <string>Save new image</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonGaussian">
+          <property name="text">
+           <string>Gaussian convolution</string>
           </property>
          </widget>
         </item>

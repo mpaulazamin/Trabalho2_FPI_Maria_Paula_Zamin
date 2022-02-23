@@ -547,3 +547,78 @@ void MainWindow::on_pushButtonNegative_clicked()
         ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_RGB888)));
     }
 }
+
+void MainWindow::on_pushButtonGaussian_clicked()
+{
+    QString extension;
+    extension = ui->lineEditReadImage->text();
+
+    cv::Mat original = cv::imread(extension.toStdString());
+    if (original.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    cv::Mat modified = cv::imread(extension.toStdString());
+    if (modified.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    cv::Mat filtered = cv::imread(extension.toStdString());
+    if (filtered.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    for(int r = 0; r < original.rows; r++)
+    {
+        for(int c = 0; c < original.cols; c++)
+        {
+            float gray = original.at<cv::Vec3b>(r, c)[0] * 0.114  + original.at<cv::Vec3b>(r, c)[1] * 0.587 + original.at<cv::Vec3b>(r, c)[2] * 0.299;
+            modified.at<cv::Vec3b>(r, c)[0] = gray;
+            modified.at<cv::Vec3b>(r, c)[1] = gray;
+            modified.at<cv::Vec3b>(r, c)[2] = gray;
+        }
+    }
+    cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
+
+
+    for(int r = 0; r < original.rows; r++)
+    {
+        for(int c = 0; c < original.cols; c++)
+        {
+            float gray = original.at<cv::Vec3b>(r, c)[0] * 0.114  + original.at<cv::Vec3b>(r, c)[1] * 0.587 + original.at<cv::Vec3b>(r, c)[2] * 0.299;
+            filtered.at<cv::Vec3b>(r, c)[0] = gray;
+            filtered.at<cv::Vec3b>(r, c)[1] = gray;
+            filtered.at<cv::Vec3b>(r, c)[2] = gray;
+        }
+    }
+
+    //cv::Mat test = filtered.clone();
+    //cv::imshow("test", test);
+    //cv::waitKey(0);
+
+    cv::cvtColor(filtered, filtered, cv::COLOR_BGR2RGB);
+
+    float gaussian[3][3] = {{0.0625, 0.125, 0.0625}, {0.125, 0.25, 0.125}, {0.0625, 0.125, 0.0625}};
+    //float laplacian[3][3] = {{0, -1, 0}, {-1, 4, -1}, {0, -1, 0}};
+
+    for(int y = 1; y < original.rows - 1; y++)
+    {
+        for(int x = 1; x < original.cols - 1; x++)
+        {
+            float sum = 0;
+            for(int k = -1; k <= 1; k++)
+            {
+                for(int j = -1; j <= 1; j++)
+                {
+                    sum = sum + gaussian[j+1][k+1] * modified.at<uchar>(y - j, x - k);
+                }
+            }
+            filtered.at<uint8_t>(y, x) = sum;
+        }
+    }
+
+    ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(filtered.data, filtered.cols, filtered.rows, filtered.step, QImage::Format_RGB888)));
+}
