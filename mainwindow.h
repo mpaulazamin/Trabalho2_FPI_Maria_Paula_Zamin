@@ -13,7 +13,6 @@
 #include <QPixmap>
 #include <QString>
 #include <QDebug>
-#include <graphics.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -36,6 +35,9 @@ private slots:
     void on_pushButtonSaveNewImage_clicked();
     void on_pushButtonQuantizeImage_clicked();
     void on_pushButtonHistogram_clicked();
+    void on_pushButtonNegative_clicked();
+    void on_spinBoxBrightness_valueChanged(int arg1);
+    void on_spinBoxContrast_valueChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;

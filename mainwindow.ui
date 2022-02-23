@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>858</width>
-    <height>327</height>
+    <width>800</width>
+    <height>434</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -75,9 +75,32 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButtonHistogram">
+         <widget class="QPushButton" name="pushButtonNegative">
           <property name="text">
-           <string>Histogram</string>
+           <string>Negative</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Brightness</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spinBoxBrightness">
+          <property name="minimum">
+           <number>-255</number>
+          </property>
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="singleStep">
+           <number>1</number>
           </property>
          </widget>
         </item>
@@ -106,6 +129,26 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Contrast</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spinBoxContrast">
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>255</number>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
@@ -131,6 +174,13 @@
          <widget class="QPushButton" name="pushButtonQuantizeImage">
           <property name="text">
            <string>Quantize Image</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonHistogram">
+          <property name="text">
+           <string>Histogram</string>
           </property>
          </widget>
         </item>
@@ -173,7 +223,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>858</width>
+     <width>800</width>
      <height>22</height>
     </rect>
    </property>

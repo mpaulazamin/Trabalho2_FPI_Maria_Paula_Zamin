@@ -259,16 +259,16 @@ void MainWindow::on_pushButtonHistogram_clicked()
         }
         cv::cvtColor(modified, modified, cv::COLOR_BGR2GRAY);
 
-        // allcoate memory for no of pixels for each intensity value
+        // Creates array to store histogram values
         int histogram[256];
 
-        // initialize all intensity values to 0
+        // Initializes all intensities values to zero
         for(int i = 0; i < 255; i++)
         {
             histogram[i] = 0;
         }
 
-        // calculate the no of pixels for each intensity values
+        // Calculates the number of pixels for each intensity value
         for(int r = 0; r < modified.rows; r++)
         {
             for(int c = 0; c < modified.cols; c++)
@@ -277,13 +277,7 @@ void MainWindow::on_pushButtonHistogram_clicked()
             }
         }
 
-        //histogram values
-        //for(int i = 0; i < 256; i++)
-        //{
-        //    cout << histogram[i] << endl;
-        //}
-
-        // draw the histograms
+        // Draws the histogram
         int hist_w = 512;
         int hist_h = 400;
         int bin_w = cvRound((double)hist_w/256);
@@ -292,7 +286,7 @@ void MainWindow::on_pushButtonHistogram_clicked()
         //cout << histImage.size().width << " " << histImage.size().height << endl;
         cv::cvtColor(histImage, histImage, cv::COLOR_BGR2GRAY);
 
-        // find the maximum intensity element from histogram
+        // Finds the maximum intensity element from histogram
         int max = histogram[0];
         for(int i = 1; i < 256; i++)
         {
@@ -302,7 +296,7 @@ void MainWindow::on_pushButtonHistogram_clicked()
             }
         }
 
-        // normalize the histogram between 0 and histImage.rows
+        // Normalizes the histogram between 0 and histImage.rows
         for(int i = 0; i < 255; i++)
         {
             histogram[i] = ((double)histogram[i]/max) * histImage.rows;
@@ -320,5 +314,236 @@ void MainWindow::on_pushButtonHistogram_clicked()
         // display histogram
         cv::imshow("Intensity Histogram", histImage);
         cv::waitKey();
+    }
+}
+
+void MainWindow::on_spinBoxBrightness_valueChanged(int arg1)
+{
+    QString extension;
+    extension = ui->lineEditReadImage->text();
+
+    int brigthness = (int)arg1;
+    // cout << brigthness << endl;
+
+    cv::Mat original = cv::imread(extension.toStdString());
+    if (original.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    cv::Mat modified = cv::imread(extension.toStdString());
+    if (modified.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    if (original.channels() == 3)
+    {
+        for(int r = 0; r < original.rows; r++)
+        {
+            for(int c = 0; c < original.cols; c++)
+            {
+                float pixelB = modified.at<cv::Vec3b>(r, c)[0] * 1;
+                float pixelG = modified.at<cv::Vec3b>(r, c)[1] * 1;
+                float pixelR = modified.at<cv::Vec3b>(r, c)[2] * 1;
+
+                pixelB = pixelB + brigthness;
+                pixelG = pixelG + brigthness;
+                pixelR = pixelR + brigthness;
+
+                if (pixelB < 0)
+                {
+                    pixelB = 0;
+                }
+
+                if (pixelB > 255)
+                {
+                    pixelB = 255;
+                }
+
+                if (pixelG < 0)
+                {
+                    pixelG = 0;
+                }
+
+                if (pixelG > 255)
+                {
+                    pixelG = 255;
+                }
+
+                if (pixelR < 0)
+                {
+                    pixelR = 0;
+                }
+
+                if (pixelR > 255)
+                {
+                    pixelR = 255;
+                }
+
+                modified.at<cv::Vec3b>(r, c)[0] = pixelB;
+                modified.at<cv::Vec3b>(r, c)[1] = pixelG;
+                modified.at<cv::Vec3b>(r, c)[2] = pixelR;
+            }
+        }
+        cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_RGB888)));
+    }
+
+    else if (original.channels() == 1)
+    {
+        for(int r = 0; r < original.rows; r++)
+        {
+            for(int c = 0; c < original.cols; c++)
+            {
+                float pixel = original.at<uint8_t>(r, c) * 1;
+                pixel = pixel + brigthness;
+
+                if (pixel < 0)
+                {
+                    pixel = 0;
+                }
+
+                if (pixel > 255)
+                {
+                    pixel = 255;
+                }
+
+                original.at<uint8_t>(r, c) = pixel;
+            }
+        }
+        cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_RGB888)));
+    }
+}
+
+void MainWindow::on_spinBoxContrast_valueChanged(int arg1)
+{
+    QString extension;
+    extension = ui->lineEditReadImage->text();
+
+    int contrast = (int)arg1;
+    // cout << contrast << endl;
+
+    cv::Mat original = cv::imread(extension.toStdString());
+    if (original.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    cv::Mat modified = cv::imread(extension.toStdString());
+    if (modified.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    if (original.channels() == 3)
+    {
+        for(int r = 0; r < original.rows; r++)
+        {
+            for(int c = 0; c < original.cols; c++)
+            {
+                float pixelB = modified.at<cv::Vec3b>(r, c)[0] * 1;
+                float pixelG = modified.at<cv::Vec3b>(r, c)[1] * 1;
+                float pixelR = modified.at<cv::Vec3b>(r, c)[2] * 1;
+
+                pixelB = pixelB * contrast;
+                pixelG = pixelG * contrast;
+                pixelR = pixelR * contrast;
+
+                if (pixelB > 255)
+                {
+                    pixelB = 255;
+                }
+
+                if (pixelG > 255)
+                {
+                    pixelG = 255;
+                }
+
+                if (pixelR > 255)
+                {
+                    pixelR = 255;
+                }
+
+                modified.at<cv::Vec3b>(r, c)[0] = pixelB;
+                modified.at<cv::Vec3b>(r, c)[1] = pixelG;
+                modified.at<cv::Vec3b>(r, c)[2] = pixelR;
+            }
+        }
+        cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_RGB888)));
+    }
+
+    else if (original.channels() == 1)
+    {
+        for(int r = 0; r < original.rows; r++)
+        {
+            for(int c = 0; c < original.cols; c++)
+            {
+                float pixel = original.at<uint8_t>(r, c) * 1;
+                pixel = pixel * contrast;
+
+                if (pixel < 0)
+                {
+                    pixel = 0;
+                }
+
+                if (pixel > 255)
+                {
+                    pixel = 255;
+                }
+
+                original.at<uint8_t>(r, c) = pixel;
+            }
+        }
+        cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_RGB888)));
+    }
+}
+
+void MainWindow::on_pushButtonNegative_clicked()
+{
+    QString extension;
+    extension = ui->lineEditReadImage->text();
+
+    cv::Mat original = cv::imread(extension.toStdString());
+    if (original.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    cv::Mat modified = cv::imread(extension.toStdString());
+    if (modified.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    if (original.channels() == 3)
+    {
+        for(int r = 0; r < original.rows; r++)
+        {
+            for(int c = 0; c < original.cols; c++)
+            {
+                modified.at<cv::Vec3b>(r, c)[0] = 255 - modified.at<cv::Vec3b>(r, c)[0];
+                modified.at<cv::Vec3b>(r, c)[1] = 255 - modified.at<cv::Vec3b>(r, c)[1];
+                modified.at<cv::Vec3b>(r, c)[2] = 255 - modified.at<cv::Vec3b>(r, c)[2];
+            }
+        }
+        cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_RGB888)));
+    }
+
+    else if (original.channels() == 1)
+    {
+        for(int r = 0; r < original.rows; r++)
+        {
+            for(int c = 0; c < original.cols; c++)
+            {
+                original.at<uint8_t>(r, c) = 255 - original.at<uint8_t>(r, c);
+            }
+        }
+        cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_RGB888)));
     }
 }
