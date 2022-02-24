@@ -6,33 +6,33 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>434</height>
+    <width>944</width>
+    <height>351</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_5">
-    <item>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
      <widget class="QLabel" name="label_4">
       <property name="text">
        <string>Author: Maria Paula Coser Zamin           Card number: 00301927</string>
       </property>
      </widget>
     </item>
-    <item>
+    <item row="1" column="0">
      <widget class="QLabel" name="label_3">
       <property name="text">
        <string>Insert path to read image (example: /home/ubuntu/image.jpg)</string>
       </property>
      </widget>
     </item>
-    <item>
+    <item row="2" column="0">
      <widget class="QLineEdit" name="lineEditReadImage"/>
     </item>
-    <item>
+    <item row="3" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QLabel" name="displayOriginalImage">
@@ -56,7 +56,7 @@
       </item>
      </layout>
     </item>
-    <item>
+    <item row="4" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -177,13 +177,6 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QPushButton" name="pushButtonHistogram">
-          <property name="text">
-           <string>Histogram</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
       <item>
@@ -213,13 +206,110 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButtonGaussian">
+         <widget class="QPushButton" name="pushButtonHistogram">
           <property name="text">
-           <string>Gaussian convolution</string>
+           <string>Histogram</string>
           </property>
          </widget>
         </item>
        </layout>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="1">
+     <layout class="QVBoxLayout" name="verticalLayout_8">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QLineEdit" name="lineEdit_filter00">
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEdit_filter10">
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEdit_filter20">
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QLineEdit" name="lineEdit_filter01">
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEdit_filter11">
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEdit_filter21">
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QLineEdit" name="lineEdit_filter02">
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEdit_filter12">
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEdit_filter22">
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEditGetKernelName">
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonConvolution">
+        <property name="text">
+         <string>Convolution</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -230,7 +320,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>944</width>
      <height>22</height>
     </rect>
    </property>

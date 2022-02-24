@@ -186,7 +186,6 @@ void MainWindow::on_pushButtonQuantizeImage_clicked()
             modified.at<cv::Vec3b>(r, c)[2] = gray;
         }
     }
-
     cv::cvtColor(modified, modified, cv::COLOR_BGR2GRAY);
 
     double t1, t2;
@@ -548,7 +547,7 @@ void MainWindow::on_pushButtonNegative_clicked()
     }
 }
 
-void MainWindow::on_pushButtonGaussian_clicked()
+void MainWindow::on_pushButtonConvolution_clicked()
 {
     QString extension;
     extension = ui->lineEditReadImage->text();
@@ -571,54 +570,215 @@ void MainWindow::on_pushButtonGaussian_clicked()
         cout << "Image could not be found." << endl;
     }
 
-    for(int r = 0; r < original.rows; r++)
+    QString kernelName;
+    kernelName = ui->lineEditGetKernelName->text();
+
+    QString vec00;
+    QString vec01;
+    QString vec02;
+    QString vec10;
+    QString vec11;
+    QString vec12;
+    QString vec20;
+    QString vec21;
+    QString vec22;
+
+    vec00 = ui->lineEdit_filter00->text();
+    vec01 = ui->lineEdit_filter01->text();
+    vec02 = ui->lineEdit_filter02->text();
+    vec10 = ui->lineEdit_filter10->text();
+    vec11 = ui->lineEdit_filter11->text();
+    vec12 = ui->lineEdit_filter12->text();
+    vec20 = ui->lineEdit_filter20->text();
+    vec21 = ui->lineEdit_filter21->text();
+    vec22 = ui->lineEdit_filter22->text();
+
+    float n00 = vec00.toFloat();
+    float n01 = vec01.toFloat();
+    float n02 = vec02.toFloat();
+    float n10 = vec10.toFloat();
+    float n11 = vec11.toFloat();
+    float n12 = vec12.toFloat();
+    float n20 = vec20.toFloat();
+    float n21 = vec21.toFloat();
+    float n22 = vec22.toFloat();
+
+    float kernel[3][3] = {{n00, n01, n02}, {n10, n11, n12}, {n20, n21, n22}};
+
+    if(kernelName == "Gaussian")
     {
-        for(int c = 0; c < original.cols; c++)
+        if(original.channels() == 3)
         {
-            float gray = original.at<cv::Vec3b>(r, c)[0] * 0.114  + original.at<cv::Vec3b>(r, c)[1] * 0.587 + original.at<cv::Vec3b>(r, c)[2] * 0.299;
-            modified.at<cv::Vec3b>(r, c)[0] = gray;
-            modified.at<cv::Vec3b>(r, c)[1] = gray;
-            modified.at<cv::Vec3b>(r, c)[2] = gray;
+            for(int y = 1; y < original.rows - 1; y++)
+            {
+                for(int x = 1; x < original.cols - 1; x++)
+                {
+                    float sumB = 0;
+                    float sumG = 0;
+                    float sumR = 0;
+
+                    for(int k = -1; k <= 1; k++)
+                    {
+                        for(int j = -1; j <= 1; j++)
+                        {
+                            sumB = sumB + kernel[j+1][k+1] * modified.at<cv::Vec3b>(y - j, x - k)[0];
+                            sumG = sumG + kernel[j+1][k+1] * modified.at<cv::Vec3b>(y - j, x - k)[1];
+                            sumR = sumR + kernel[j+1][k+1] * modified.at<cv::Vec3b>(y - j, x - k)[2];
+                        }
+                    }
+
+                    if (sumB < 0)
+                    {
+                        sumB = 0;
+                    }
+
+                    if (sumB > 255)
+                    {
+                        sumB = 255;
+                    }
+
+                    if (sumG < 0)
+                    {
+                        sumG = 0;
+                    }
+
+                    if (sumG > 255)
+                    {
+                        sumG = 255;
+                    }
+
+                    if (sumR < 0)
+                    {
+                        sumR = 0;
+                    }
+
+                    if (sumR > 255)
+                    {
+                        sumR = 255;
+                    }
+
+                    filtered.at<cv::Vec3b>(y, x)[0] = sumB;
+                    filtered.at<cv::Vec3b>(y, x)[1] = sumG;
+                    filtered.at<cv::Vec3b>(y, x)[2] = sumR;
+                }
+            }
+            cv::cvtColor(filtered, filtered, cv::COLOR_BGR2RGB);
+            ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(filtered.data, filtered.cols, filtered.rows, filtered.step, QImage::Format_RGB888)));
+        }
+
+        if(original.channels() == 1)
+        {
+            for(int y = 1; y < original.rows - 1; y++)
+            {
+                for(int x = 1; x < original.cols - 1; x++)
+                {
+                    float sum = 0;
+                    for(int k = -1; k <= 1; k++)
+                    {
+                        for(int j = -1; j <= 1; j++)
+                        {
+                            sum = sum + kernel[j+1][k+1] * modified.at<uint8_t>(y - j, x - k);
+                        }
+                    }
+
+                    if (sum < 0)
+                    {
+                        sum = 0;
+                    }
+
+                    if (sum > 255)
+                    {
+                        sum = 255;
+                    }
+
+                    filtered.at<uint8_t>(y, x) = sum;
+                }
+            }
+            cv::cvtColor(filtered, filtered, cv::COLOR_BGR2RGB);
+            ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(filtered.data, filtered.cols, filtered.rows, filtered.step, QImage::Format_RGB888)));
         }
     }
-    cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
 
-
-    for(int r = 0; r < original.rows; r++)
+    else
     {
-        for(int c = 0; c < original.cols; c++)
+        for(int r = 0; r < original.rows; r++)
         {
-            float gray = original.at<cv::Vec3b>(r, c)[0] * 0.114  + original.at<cv::Vec3b>(r, c)[1] * 0.587 + original.at<cv::Vec3b>(r, c)[2] * 0.299;
-            filtered.at<cv::Vec3b>(r, c)[0] = gray;
-            filtered.at<cv::Vec3b>(r, c)[1] = gray;
-            filtered.at<cv::Vec3b>(r, c)[2] = gray;
+            for(int c = 0; c < original.cols; c++)
+            {
+                float gray = original.at<cv::Vec3b>(r, c)[0] * 0.114  + original.at<cv::Vec3b>(r, c)[1] * 0.587 + original.at<cv::Vec3b>(r, c)[2] * 0.299;
+                modified.at<cv::Vec3b>(r, c)[0] = gray;
+                modified.at<cv::Vec3b>(r, c)[1] = gray;
+                modified.at<cv::Vec3b>(r, c)[2] = gray;
+            }
         }
+        cv::cvtColor(modified, modified, cv::COLOR_BGR2GRAY);
+
+        for(int r = 0; r < original.rows; r++)
+        {
+            for(int c = 0; c < original.cols; c++)
+            {
+                float gray = original.at<cv::Vec3b>(r, c)[0] * 0.114  + original.at<cv::Vec3b>(r, c)[1] * 0.587 + original.at<cv::Vec3b>(r, c)[2] * 0.299;
+                filtered.at<cv::Vec3b>(r, c)[0] = gray;
+                filtered.at<cv::Vec3b>(r, c)[1] = gray;
+                filtered.at<cv::Vec3b>(r, c)[2] = gray;
+            }
+        }
+        cv::cvtColor(filtered, filtered, cv::COLOR_BGR2GRAY);
+
+        //cout << modified.channels() << endl;
+        //cout << original.channels() << endl;
+
+        for(int y = 1; y < original.rows - 1; y++)
+        {
+            for(int x = 1; x < original.cols - 1; x++)
+            {
+                float sum = 0;
+                for(int k = -1; k <= 1; k++)
+                {
+                    for(int j = -1; j <= 1; j++)
+                    {
+                        sum = sum + kernel[j+1][k+1] * modified.at<uint8_t>(y - j, x - k);
+                    }
+                }
+
+                if(kernelName == "HighPass" || kernelName == "Laplacian")
+                {
+                    if (sum < 0)
+                    {
+                        sum = 0;
+                    }
+
+                    if (sum > 255)
+                    {
+                        sum = 255;
+                    }
+                }
+
+                if(kernelName == "PrewittHy" || kernelName == "PrewittHx" || kernelName == "SobelHx" || kernelName == "SobelHy")
+                {
+                    sum = sum + 127;
+
+                    if (sum < 0)
+                    {
+                        sum = 0;
+                    }
+
+                    if (sum > 255)
+                    {
+                        sum = 255;
+                    }
+                }
+
+                filtered.at<uint8_t>(y, x) = sum;
+            }
+        }
+        // cv::cvtColor(filtered, filtered, cv::COLOR_BGR2RGB);
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(filtered.data, filtered.cols, filtered.rows, filtered.step, QImage::Format_Grayscale8)));
     }
 
     //cv::Mat test = filtered.clone();
     //cv::imshow("test", test);
     //cv::waitKey(0);
 
-    cv::cvtColor(filtered, filtered, cv::COLOR_BGR2RGB);
-
-    float gaussian[3][3] = {{0.0625, 0.125, 0.0625}, {0.125, 0.25, 0.125}, {0.0625, 0.125, 0.0625}};
     //float laplacian[3][3] = {{0, -1, 0}, {-1, 4, -1}, {0, -1, 0}};
-
-    for(int y = 1; y < original.rows - 1; y++)
-    {
-        for(int x = 1; x < original.cols - 1; x++)
-        {
-            float sum = 0;
-            for(int k = -1; k <= 1; k++)
-            {
-                for(int j = -1; j <= 1; j++)
-                {
-                    sum = sum + gaussian[j+1][k+1] * modified.at<uchar>(y - j, x - k);
-                }
-            }
-            filtered.at<uint8_t>(y, x) = sum;
-        }
-    }
-
-    ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(filtered.data, filtered.cols, filtered.rows, filtered.step, QImage::Format_RGB888)));
 }

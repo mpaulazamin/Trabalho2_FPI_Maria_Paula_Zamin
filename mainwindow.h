@@ -38,8 +38,7 @@ private slots:
     void on_pushButtonNegative_clicked();
     void on_spinBoxBrightness_valueChanged(int arg1);
     void on_spinBoxContrast_valueChanged(int arg1);
-
-    void on_pushButtonGaussian_clicked();
+    void on_pushButtonConvolution_clicked();
 
 private:
     Ui::MainWindow *ui;
