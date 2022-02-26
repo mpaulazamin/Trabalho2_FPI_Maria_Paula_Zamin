@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>944</width>
-    <height>351</height>
+    <height>401</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -104,6 +104,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonZoomIn">
+          <property name="text">
+           <string>Zoom in</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
@@ -149,6 +156,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonZoomOut">
+          <property name="text">
+           <string>Zoom out</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
@@ -174,6 +188,20 @@
          <widget class="QPushButton" name="pushButtonQuantizeImage">
           <property name="text">
            <string>Quantize Image</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonRotateClockWise">
+          <property name="text">
+           <string>Rotate clockwise</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonRotateAntiClockWise">
+          <property name="text">
+           <string>Rotate anticlockwise</string>
           </property>
          </widget>
         </item>
@@ -326,7 +354,7 @@
    </property>
    <widget class="QMenu" name="menuTrabalho_1">
     <property name="title">
-     <string>Fundamentals of Image Processing 2021/2 - First programming assingment</string>
+     <string>Fundamentals of Image Processing 2021/2 - Second programming assingment</string>
     </property>
    </widget>
    <addaction name="menuTrabalho_1"/>

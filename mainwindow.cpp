@@ -782,3 +782,176 @@ void MainWindow::on_pushButtonConvolution_clicked()
 
     //float laplacian[3][3] = {{0, -1, 0}, {-1, 4, -1}, {0, -1, 0}};
 }
+
+void MainWindow::on_pushButtonRotateClockWise_clicked()
+{
+    QImage newImage;
+    const QPixmap *pixMap = ui->displayNewImage->pixmap();
+
+    if (pixMap)
+    {
+        newImage = pixMap->toImage();
+    }
+
+    newImage.save("/home/ubuntu/original.jpg");
+
+    cv::Mat original = cv::imread("/home/ubuntu/original.jpg");
+    if (original.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    int new_width = original.size().height;
+    int new_height = original.size().width;
+
+    QImage image = QImage(new_width, new_height, QImage::Format_RGB888);
+    image.fill(0);
+    image.save("/home/ubuntu/clockwise.jpg");
+
+    cv::Mat modified = cv::imread("/home/ubuntu/clockwise.jpg");
+    if (modified.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    if (modified.channels() == 3)
+    {
+        for(int i = 0; i < original.cols; i++)
+        {
+            for(int j = 0; j < original.rows; j++)
+            {
+                modified.at<cv::Vec3b>(i, j)[0] = original.at<cv::Vec3b>(original.rows - 1 - j, i)[0];
+                modified.at<cv::Vec3b>(i, j)[1] = original.at<cv::Vec3b>(original.rows - 1 - j, i)[1];
+                modified.at<cv::Vec3b>(i, j)[2] = original.at<cv::Vec3b>(original.rows - 1 - j, i)[2];
+            }
+        }
+        cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_RGB888)));
+    }
+}
+
+void MainWindow::on_pushButtonRotateAntiClockWise_clicked()
+{
+    QImage newImage;
+    const QPixmap *pixMap = ui->displayNewImage->pixmap();
+
+    if (pixMap)
+    {
+        newImage = pixMap->toImage();
+    }
+
+    newImage.save("/home/ubuntu/original.jpg");
+
+    cv::Mat original = cv::imread("/home/ubuntu/original.jpg");
+    if (original.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    int new_width = original.size().height;
+    int new_height = original.size().width;
+
+    QImage image = QImage(new_width, new_height, QImage::Format_RGB888);
+    image.fill(0);
+    image.save("/home/ubuntu/anticlockwise.jpg");
+
+    cv::Mat modified = cv::imread("/home/ubuntu/anticlockwise.jpg");
+    if (modified.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    if (modified.channels() == 3)
+    {
+        for(int i = 0; i < original.cols; i++)
+        {
+            for(int j = 0; j < original.rows; j++)
+            {
+                modified.at<cv::Vec3b>(i, j)[0] = original.at<cv::Vec3b>(j, original.cols - 1 - i)[0];
+                modified.at<cv::Vec3b>(i, j)[1] = original.at<cv::Vec3b>(j, original.cols - 1 - i)[1];
+                modified.at<cv::Vec3b>(i, j)[2] = original.at<cv::Vec3b>(j, original.cols - 1 - i)[2];
+            }
+        }
+        cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_RGB888)));
+    }
+}
+
+void MainWindow::on_pushButtonZoomIn_clicked()
+{
+    QString extension;
+    extension = ui->lineEditReadImage->text();
+
+    cv::Mat original = cv::imread(extension.toStdString());
+    if (original.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    int new_width = 2 * original.size().width - 1;
+    int new_height = 2 * original.size().height - 1;
+
+    QImage image = QImage(new_width, new_height, QImage::Format_RGB888);
+    image.fill(0);
+    image.save("/home/ubuntu/zoomin.jpg");
+
+    cv::Mat modified = cv::imread("/home/ubuntu/zoomin.jpg");
+    if (modified.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    if (modified.channels() == 3)
+    {
+        int i = 0;
+
+        for(int r = 0; r < modified.rows; r = r + 2)
+        {
+            int j = 0;
+            for(int c = 0; c < modified.cols; c = c + 2)
+            {
+                modified.at<cv::Vec3b>(r, c)[0] = original.at<cv::Vec3b>(i, j)[0];
+                modified.at<cv::Vec3b>(r, c)[1] = original.at<cv::Vec3b>(i, j)[1];
+                modified.at<cv::Vec3b>(r, c)[2] = original.at<cv::Vec3b>(i, j)[2];
+
+                j = j + 1;
+            }
+            i = i + 1;
+        }
+
+        cv::Mat modified1 = modified.clone();
+        cv::imshow("mod", modified);
+
+        for(int r = 0; r < modified.rows; r = r + 2)
+        {
+            for(int c = 1; c <= modified.cols; c = c + 2)
+            {
+                modified1.at<cv::Vec3b>(r, c)[0] = modified.at<cv::Vec3b>(r, c - 1)[0] + (modified.at<cv::Vec3b>(r, c + 1)[0] - modified.at<cv::Vec3b>(r, c - 1)[0]) / 2;
+                modified1.at<cv::Vec3b>(r, c)[1] = modified.at<cv::Vec3b>(r, c - 1)[1] + (modified.at<cv::Vec3b>(r, c + 1)[1] - modified.at<cv::Vec3b>(r, c - 1)[1]) / 2;
+                modified1.at<cv::Vec3b>(r, c)[2] = modified.at<cv::Vec3b>(r, c - 1)[2] + (modified.at<cv::Vec3b>(r, c + 1)[2] - modified.at<cv::Vec3b>(r, c - 1)[2]) / 2;
+            }
+        }
+
+        cv::imshow("mod1", modified1);
+
+        cv::Mat modified2 = modified1.clone();
+
+        for(int r = 1; r <= modified1.rows; r = r + 2)
+        {
+            for(int c = 0; c < modified1.cols; c = c + 1)
+            {
+                modified2.at<cv::Vec3b>(r, c)[0] = modified1.at<cv::Vec3b>(r - 1, c)[0] + (modified1.at<cv::Vec3b>(r + 1, c)[0] - modified1.at<cv::Vec3b>(r - 1, c)[0]) / 2;
+                modified2.at<cv::Vec3b>(r, c)[1] = modified1.at<cv::Vec3b>(r - 1, c)[1] + (modified1.at<cv::Vec3b>(r + 1, c)[1] - modified1.at<cv::Vec3b>(r - 1, c)[1]) / 2;
+                modified2.at<cv::Vec3b>(r, c)[2] = modified1.at<cv::Vec3b>(r - 1, c)[2] + (modified1.at<cv::Vec3b>(r + 1, c)[2] - modified1.at<cv::Vec3b>(r - 1, c)[2]) / 2;
+            }
+        }
+
+        cv::imshow("mod2", modified2);
+        cv::waitKey(0);
+    }
+}
+
+void MainWindow::on_pushButtonZoomOut_clicked()
+{
+
+}

@@ -39,6 +39,10 @@ private slots:
     void on_spinBoxBrightness_valueChanged(int arg1);
     void on_spinBoxContrast_valueChanged(int arg1);
     void on_pushButtonConvolution_clicked();
+    void on_pushButtonRotateClockWise_clicked();
+    void on_pushButtonRotateAntiClockWise_clicked();
+    void on_pushButtonZoomIn_clicked();
+    void on_pushButtonZoomOut_clicked();
 
 private:
     Ui::MainWindow *ui;
