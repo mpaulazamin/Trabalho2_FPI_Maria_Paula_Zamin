@@ -920,7 +920,7 @@ void MainWindow::on_pushButtonZoomIn_clicked()
         }
 
         cv::Mat modified1 = modified.clone();
-        cv::imshow("mod", modified);
+        // cv::imshow("mod", modified);
 
         for(int r = 0; r < modified.rows; r = r + 2)
         {
@@ -932,7 +932,7 @@ void MainWindow::on_pushButtonZoomIn_clicked()
             }
         }
 
-        cv::imshow("mod1", modified1);
+        // cv::imshow("mod1", modified1);
 
         cv::Mat modified2 = modified1.clone();
 
@@ -946,7 +946,7 @@ void MainWindow::on_pushButtonZoomIn_clicked()
             }
         }
 
-        cv::imshow("mod2", modified2);
+        cv::imshow("Zoom In", modified2);
         cv::waitKey(0);
     }
 }
