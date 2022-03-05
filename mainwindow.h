@@ -43,6 +43,8 @@ private slots:
     void on_pushButtonRotateAntiClockWise_clicked();
     void on_pushButtonZoomIn_clicked();
     void on_pushButtonZoomOut_clicked();
+    void on_pushButtonHistogramEqualization_clicked();
+    void on_pushButtonHistogramMatching_clicked();
 
 private:
     Ui::MainWindow *ui;

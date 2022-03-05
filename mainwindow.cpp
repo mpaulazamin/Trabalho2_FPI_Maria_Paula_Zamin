@@ -4,6 +4,55 @@
 using namespace std;
 using namespace cv;
 
+int getClosest(int val1, int val2, int target)
+{
+    if (target - val1 >= val2 - target)
+        return val2;
+    else
+        return val1;
+}
+
+int findClosest(int arr[], int n, int target)
+{
+    // Corner cases
+    if (target <= arr[0])
+        return arr[0];
+    if (target >= arr[n - 1])
+        return arr[n - 1];
+
+    // Doing binary search
+    int i = 0, j = n, mid = 0;
+    while (i < j) {
+        mid = (i + j) / 2;
+
+        if (arr[mid] == target)
+            return arr[mid];
+
+        /* If target is less than array element,
+            then search in left */
+        if (target < arr[mid]) {
+
+            // If target is greater than previous
+            // to mid, return closest of two
+            if (mid > 0 && target > arr[mid - 1])
+                return getClosest(arr[mid - 1], arr[mid], target);
+
+            /* Repeat for left half */
+            j = mid;
+        }
+
+        // If target is greater than mid
+        else {
+            if (mid < n - 1 && target < arr[mid + 1])
+                return getClosest(arr[mid], arr[mid + 1], target);
+            // update i
+            i = mid + 1;
+        }
+    }
+    // Only single element left after search
+    return arr[mid];
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -314,6 +363,243 @@ void MainWindow::on_pushButtonHistogram_clicked()
         cv::imshow("Intensity Histogram", histImage);
         cv::waitKey();
     }
+}
+
+void MainWindow::on_pushButtonHistogramEqualization_clicked()
+{
+    QString extension;
+    extension = ui->lineEditReadImage->text();
+
+    cv::Mat original = cv::imread(extension.toStdString());
+    if (original.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    cv::Mat modified = original.clone();
+
+    if (original.channels() == 1)
+    {
+        int histogram[256];
+        int hist_cum[256];
+
+        for(int i = 0; i < 255; i++)
+        {
+            histogram[i] = 0;
+            hist_cum[i] = 0;
+        }
+
+        for(int r = 0; r < original.rows; r++)
+        {
+            for(int c = 0; c < original.cols; c++)
+            {
+                histogram[(int)original.at<uchar>(r, c)]++;
+            }
+        }
+
+        float alpha = 255 / (original.rows * original.cols);
+        cout << alpha << endl;
+        hist_cum[0] = (int)(alpha * histogram[0]);
+        cout << hist_cum[0] << endl;
+
+        for(int i = 1; i < 255; i++)
+        {
+            hist_cum[i] = (int)hist_cum[i-1] + (int)(alpha * histogram[i]);
+        }
+
+        for(int r = 0; r < original.rows; r++)
+        {
+            for(int c = 0; c < original.cols; c++)
+            {
+                modified.at<uint8_t>(r, c) = hist_cum[original.at<uint8_t>(r, c)];
+            }
+        }
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_Grayscale8)));
+    }
+
+    if (original.channels() == 3)
+    {
+        cv::Mat grayimg = original.clone();
+
+        for(int r = 0; r < original.rows; r++)
+        {
+            for(int c = 0; c < original.cols; c++)
+            {
+                float gray = original.at<cv::Vec3b>(r, c)[0] * 0.114  + original.at<cv::Vec3b>(r, c)[1] * 0.587 + original.at<cv::Vec3b>(r, c)[2] * 0.299;
+                grayimg.at<cv::Vec3b>(r, c)[0] = gray;
+                grayimg.at<cv::Vec3b>(r, c)[1] = gray;
+                grayimg.at<cv::Vec3b>(r, c)[2] = gray;
+            }
+        }
+        cv::cvtColor(grayimg, grayimg, cv::COLOR_BGR2GRAY);
+
+        int histogram[256];
+        double hist_cum[256];
+
+        for(int i = 0; i < 255; i++)
+        {
+            histogram[i] = 0;
+            hist_cum[i] = 0;
+        }
+
+        for(int r = 0; r < original.rows; r++)
+        {
+            for(int c = 0; c < original.cols; c++)
+            {
+                histogram[(int)grayimg.at<uchar>(r, c)]++;
+            }
+        }
+
+        // for(int i = 0; i < 255; i++)
+        // {
+        //    cout << histogram[i] << endl;
+        // }
+
+        int size = original.rows * original.cols;
+        double alpha = 255.0 / size;
+        hist_cum[0] = alpha * histogram[0];
+
+        for(int i = 1; i < 255; i++)
+        {
+            hist_cum[i] = round(hist_cum[i-1]) + round(alpha * histogram[i]);
+        }
+
+        for(int r = 0; r < original.rows; r++)
+        {
+            for(int c = 0; c < original.cols; c++)
+            {
+                // modified.at<cv::Vec3b>(r, c)[0] = saturate_cast<uchar>(hist_cum[original.at<cv::Vec3b>(r, c)[0]]);
+                // modified.at<cv::Vec3b>(r, c)[1] = saturate_cast<uchar>(hist_cum[original.at<cv::Vec3b>(r, c)[1]]);
+                // modified.at<cv::Vec3b>(r, c)[2] = saturate_cast<uchar>(hist_cum[original.at<cv::Vec3b>(r, c)[2]]);
+
+                modified.at<cv::Vec3b>(r, c)[0] = hist_cum[original.at<cv::Vec3b>(r, c)[0]];
+                modified.at<cv::Vec3b>(r, c)[1] = hist_cum[original.at<cv::Vec3b>(r, c)[1]];
+                modified.at<cv::Vec3b>(r, c)[2] = hist_cum[original.at<cv::Vec3b>(r, c)[2]];
+            }
+        }
+        cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_RGB888)));
+    }
+}
+
+void MainWindow::on_pushButtonHistogramMatching_clicked()
+{
+    QString extension;
+    extension = ui->lineEditReadImage->text();
+
+    cv::Mat source = cv::imread(extension.toStdString());
+    if (source.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+    cv::Mat source_gray = source.clone();
+
+    cv::Mat target = cv::imread("/home/ubuntu/fig.jpg");
+    if (target.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+    cv::Mat target_gray = target.clone();
+
+    for(int r = 0; r < source.rows; r++)
+    {
+        for(int c = 0; c < source.cols; c++)
+        {
+            float gray = source.at<cv::Vec3b>(r, c)[0] * 0.114  + source.at<cv::Vec3b>(r, c)[1] * 0.587 + source.at<cv::Vec3b>(r, c)[2] * 0.299;
+            source_gray.at<cv::Vec3b>(r, c)[0] = gray;
+            source_gray.at<cv::Vec3b>(r, c)[1] = gray;
+            source_gray.at<cv::Vec3b>(r, c)[2] = gray;
+        }
+    }
+    cv::cvtColor(source_gray, source_gray, cv::COLOR_BGR2GRAY);
+
+    for(int r = 0; r < target.rows; r++)
+    {
+        for(int c = 0; c < target.cols; c++)
+        {
+            float gray = target.at<cv::Vec3b>(r, c)[0] * 0.114  + target.at<cv::Vec3b>(r, c)[1] * 0.587 + target.at<cv::Vec3b>(r, c)[2] * 0.299;
+            target_gray.at<cv::Vec3b>(r, c)[0] = gray;
+            target_gray.at<cv::Vec3b>(r, c)[1] = gray;
+            target_gray.at<cv::Vec3b>(r, c)[2] = gray;
+        }
+    }
+    cv::cvtColor(target_gray, target_gray, cv::COLOR_BGR2GRAY);
+
+    int histogram_source[256];
+    int histogram_target[256];
+    int HM[256];
+
+    double hist_cum_source[256];
+    double hist_cum_target[256];
+
+    for(int i = 0; i < 255; i++)
+    {
+        histogram_source[i] = 0;
+        histogram_target[i] = 0;
+        hist_cum_source[i] = 0;
+        hist_cum_target[i] = 0;
+    }
+
+    for(int r = 0; r < source.rows; r++)
+    {
+        for(int c = 0; c < source.cols; c++)
+        {
+            histogram_source[(int)source_gray.at<uchar>(r, c)]++;
+        }
+    }
+
+    for(int r = 0; r < target.rows; r++)
+    {
+        for(int c = 0; c < target.cols; c++)
+        {
+            histogram_target[(int)target_gray.at<uchar>(r, c)]++;
+        }
+    }
+
+    int size_source = source.rows * source.cols;
+    double alpha_source = 255.0 / size_source;
+    hist_cum_source[0] = alpha_source * histogram_source[0];
+
+    for(int i = 1; i < 255; i++)
+    {
+        hist_cum_source[i] = round(hist_cum_source[i-1]) + round(alpha_source * histogram_source[i]);
+    }
+
+    int size_target = target.rows * target.cols;
+    double alpha_target = 255.0 / size_target;
+    hist_cum_target[0] = alpha_target * histogram_target[0];
+
+    for(int i = 1; i < 255; i++)
+    {
+        hist_cum_target[i] = round(hist_cum_target[i-1]) + round(alpha_target * histogram_target[i]);
+    }
+
+    int hist_cum_target_int[256];
+    for(int i = 1; i < 255; i++)
+    {
+        hist_cum_target_int[i] = round(hist_cum_target[i]);
+    }
+
+    for (int shade_level = 0; shade_level < 255; shade_level++)
+    {
+        int n = 255;
+        HM[shade_level] = findClosest(hist_cum_target_int, n, shade_level);
+    }
+
+    // for(int r = 0; r < original.rows; r++)
+    // {
+    //    for(int c = 0; c < original.cols; c++)
+    //    {
+    //        modified.at<uint8_t>(r, c) = hist_cum[original.at<uint8_t>(r, c)];
+    //    }
+    // }
+    // ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_Grayscale8)));
+
+    // int arr[] = {1, 2, 4, 5, 6, 6, 8, 9};
+    // int n = sizeof(arr) / sizeof(arr[0]);
+    // cout << n << endl;
+    // int targetn = 11;
+    // cout << (findClosest(arr, n, targetn));
 }
 
 void MainWindow::on_spinBoxBrightness_valueChanged(int arg1)
@@ -879,6 +1165,10 @@ void MainWindow::on_pushButtonRotateAntiClockWise_clicked()
 
 void MainWindow::on_pushButtonZoomIn_clicked()
 {
+    // QString number;
+    // number = ui->lineEditQuantize->text();
+    // int n = number.toInt();
+
     QString extension;
     extension = ui->lineEditReadImage->text();
 
@@ -953,5 +1243,40 @@ void MainWindow::on_pushButtonZoomIn_clicked()
 
 void MainWindow::on_pushButtonZoomOut_clicked()
 {
+    QString extension;
+    extension = ui->lineEditReadImage->text();
 
+    cv::Mat original = cv::imread(extension.toStdString());
+    if (original.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
+
+    int sx = 5;
+    int sy = 5;
+
+    int original_rows = original.rows;
+    int original_cols = original.cols;
+
+    int fit_rows = round(original_rows / sx);
+    int fit_cols = round(original_cols / sy);
+
+    int remain_rows  = original_rows - sx * fit_rows;
+    int remain_cols = original_cols - sy * fit_cols;
+
+    int new_rows = fit_rows + remain_rows;
+    int new_cols = fit_cols + remain_cols;
+
+    cout << fit_rows << remain_rows << new_rows << endl;
+    cout << fit_cols << remain_cols << new_cols << endl;
+
+    QImage image = QImage(new_rows, new_cols, QImage::Format_RGB888);
+    image.fill(0);
+    image.save("/home/ubuntu/zoomout.jpg");
+
+    cv::Mat modified = cv::imread("/home/ubuntu/zoomout.jpg");
+    if (modified.empty())
+    {
+        cout << "Image could not be found." << endl;
+    }
 }
