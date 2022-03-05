@@ -7,44 +7,60 @@ using namespace cv;
 int getClosest(int val1, int val2, int target)
 {
     if (target - val1 >= val2 - target)
+    {
         return val2;
+    }
     else
+    {
         return val1;
+    }
 }
 
 int findClosest(int arr[], int n, int target)
 {
     // Corner cases
     if (target <= arr[0])
+    {
         return arr[0];
+    }
     if (target >= arr[n - 1])
+    {
         return arr[n - 1];
+    }
 
     // Doing binary search
     int i = 0, j = n, mid = 0;
-    while (i < j) {
+
+    while (i < j)
+    {
         mid = (i + j) / 2;
 
         if (arr[mid] == target)
+        {
             return arr[mid];
+        }
 
-        /* If target is less than array element,
-            then search in left */
-        if (target < arr[mid]) {
-
+        // If target is less than array element, then search in left
+        if (target < arr[mid])
+        {
             // If target is greater than previous
             // to mid, return closest of two
             if (mid > 0 && target > arr[mid - 1])
+            {
                 return getClosest(arr[mid - 1], arr[mid], target);
+            }
 
-            /* Repeat for left half */
+            // Repeat for left half
             j = mid;
         }
 
         // If target is greater than mid
-        else {
+        else
+        {
             if (mid < n - 1 && target < arr[mid + 1])
+            {
                 return getClosest(arr[mid], arr[mid + 1], target);
+            }
             // update i
             i = mid + 1;
         }
@@ -289,11 +305,7 @@ void MainWindow::on_pushButtonHistogram_clicked()
 
     if (original.channels() == 3)
     {
-        cv::Mat modified = cv::imread(extension.toStdString());
-        if (modified.empty())
-        {
-            cout << "Image could not be found." << endl;
-        }
+        cv::Mat modified = original.clone();
 
         for(int r = 0; r < original.rows; r++)
         {
@@ -307,16 +319,13 @@ void MainWindow::on_pushButtonHistogram_clicked()
         }
         cv::cvtColor(modified, modified, cv::COLOR_BGR2GRAY);
 
-        // Creates array to store histogram values
         int histogram[256];
 
-        // Initializes all intensities values to zero
         for(int i = 0; i < 255; i++)
         {
             histogram[i] = 0;
         }
 
-        // Calculates the number of pixels for each intensity value
         for(int r = 0; r < modified.rows; r++)
         {
             for(int c = 0; c < modified.cols; c++)
@@ -325,16 +334,20 @@ void MainWindow::on_pushButtonHistogram_clicked()
             }
         }
 
-        // Draws the histogram
-        int hist_w = 512;
-        int hist_h = 400;
-        int bin_w = cvRound((double)hist_w/256);
+        int hist_width = 512;
+        int hist_height = 400;
+        int bin_w = cvRound((double) hist_width / 256);
 
-        cv::Mat histImage = cv::imread("/home/ubuntu/x.jpg");
-        //cout << histImage.size().width << " " << histImage.size().height << endl;
-        cv::cvtColor(histImage, histImage, cv::COLOR_BGR2GRAY);
+        QImage image = QImage(hist_width, hist_height, QImage::Format_Grayscale8);
+        image.fill(255);
+        image.save("/home/ubuntu/histimage.jpg");
 
-        // Finds the maximum intensity element from histogram
+        cv::Mat histImage = cv::imread("/home/ubuntu/histimage.jpg");
+        if (histImage .empty())
+        {
+            cout << "Image could not be found." << endl;
+        }
+
         int max = histogram[0];
         for(int i = 1; i < 256; i++)
         {
@@ -344,22 +357,74 @@ void MainWindow::on_pushButtonHistogram_clicked()
             }
         }
 
-        // Normalizes the histogram between 0 and histImage.rows
         for(int i = 0; i < 255; i++)
         {
             histogram[i] = ((double)histogram[i]/max) * histImage.rows;
-            //cout << histogram[i] << endl;
+            cout << histogram[i] << endl;
         }
 
-        // draw the intensity line for histogram
         for(int i = 0; i < 255; i++)
         {
-            cv::line(histImage, cv::Point(bin_w*(i), hist_h - histogram[i]), cv::Point(bin_w*(i), hist_h), cv::Scalar(0, 0, 0), 1, 8, 0);
+             cv::line(histImage, cv::Point(bin_w*(i), hist_height), cv::Point(bin_w*(i), hist_height - histogram[i]), cv::Scalar(0,0,0), 1, 8, 0);
         }
 
-        cout << "done" << endl;
+        cv::imshow("Intensity Histogram", histImage);
+        cv::waitKey();
+    }
 
-        // display histogram
+    if(original.channels() == 1)
+    {
+        cv::Mat modified = original.clone();
+
+        int histogram[256];
+
+        for(int i = 0; i < 255; i++)
+        {
+            histogram[i] = 0;
+        }
+
+        for(int r = 0; r < modified.rows; r++)
+        {
+            for(int c = 0; c < modified.cols; c++)
+            {
+                histogram[(int)modified.at<uchar>(r, c)]++;
+            }
+        }
+
+        int hist_width = 512;
+        int hist_height = 400;
+        int bin_w = cvRound((double) hist_width / 256);
+
+        QImage image = QImage(hist_width, hist_height, QImage::Format_Grayscale8);
+        image.fill(255);
+        image.save("/home/ubuntu/histimage.jpg");
+
+        cv::Mat histImage = cv::imread("/home/ubuntu/histimage.jpg");
+        if (histImage .empty())
+        {
+            cout << "Image could not be found." << endl;
+        }
+
+        int max = histogram[0];
+        for(int i = 1; i < 256; i++)
+        {
+            if(max < histogram[i])
+            {
+                max = histogram[i];
+            }
+        }
+
+        for(int i = 0; i < 255; i++)
+        {
+            histogram[i] = ((double)histogram[i]/max) * histImage.rows;
+            cout << histogram[i] << endl;
+        }
+
+        for(int i = 0; i < 255; i++)
+        {
+              cv::line(histImage, cv::Point(bin_w*(i), hist_height), cv::Point(bin_w*(i), hist_height - histogram[i]), cv::Scalar(0,0,0), 1, 8, 0);
+        }
+
         cv::imshow("Intensity Histogram", histImage);
         cv::waitKey();
     }
@@ -450,11 +515,6 @@ void MainWindow::on_pushButtonHistogramEqualization_clicked()
             }
         }
 
-        // for(int i = 0; i < 255; i++)
-        // {
-        //    cout << histogram[i] << endl;
-        // }
-
         int size = original.rows * original.cols;
         double alpha = 255.0 / size;
         hist_cum[0] = alpha * histogram[0];
@@ -468,10 +528,6 @@ void MainWindow::on_pushButtonHistogramEqualization_clicked()
         {
             for(int c = 0; c < original.cols; c++)
             {
-                // modified.at<cv::Vec3b>(r, c)[0] = saturate_cast<uchar>(hist_cum[original.at<cv::Vec3b>(r, c)[0]]);
-                // modified.at<cv::Vec3b>(r, c)[1] = saturate_cast<uchar>(hist_cum[original.at<cv::Vec3b>(r, c)[1]]);
-                // modified.at<cv::Vec3b>(r, c)[2] = saturate_cast<uchar>(hist_cum[original.at<cv::Vec3b>(r, c)[2]]);
-
                 modified.at<cv::Vec3b>(r, c)[0] = hist_cum[original.at<cv::Vec3b>(r, c)[0]];
                 modified.at<cv::Vec3b>(r, c)[1] = hist_cum[original.at<cv::Vec3b>(r, c)[1]];
                 modified.at<cv::Vec3b>(r, c)[2] = hist_cum[original.at<cv::Vec3b>(r, c)[2]];
@@ -504,29 +560,35 @@ void MainWindow::on_pushButtonHistogramMatching_clicked()
     }
     cv::Mat target_gray = target.clone();
 
-    for(int r = 0; r < source.rows; r++)
+    if(source.channels() == 3)
     {
-        for(int c = 0; c < source.cols; c++)
+        for(int r = 0; r < source.rows; r++)
         {
-            float gray = source.at<cv::Vec3b>(r, c)[0] * 0.114  + source.at<cv::Vec3b>(r, c)[1] * 0.587 + source.at<cv::Vec3b>(r, c)[2] * 0.299;
-            source_gray.at<cv::Vec3b>(r, c)[0] = gray;
-            source_gray.at<cv::Vec3b>(r, c)[1] = gray;
-            source_gray.at<cv::Vec3b>(r, c)[2] = gray;
+            for(int c = 0; c < source.cols; c++)
+            {
+                float gray = source.at<cv::Vec3b>(r, c)[0] * 0.114  + source.at<cv::Vec3b>(r, c)[1] * 0.587 + source.at<cv::Vec3b>(r, c)[2] * 0.299;
+                source_gray.at<cv::Vec3b>(r, c)[0] = gray;
+                source_gray.at<cv::Vec3b>(r, c)[1] = gray;
+                source_gray.at<cv::Vec3b>(r, c)[2] = gray;
+            }
         }
+        cv::cvtColor(source_gray, source_gray, cv::COLOR_BGR2GRAY);
     }
-    cv::cvtColor(source_gray, source_gray, cv::COLOR_BGR2GRAY);
 
-    for(int r = 0; r < target.rows; r++)
+    if(target.channels() == 3)
     {
-        for(int c = 0; c < target.cols; c++)
+        for(int r = 0; r < target.rows; r++)
         {
-            float gray = target.at<cv::Vec3b>(r, c)[0] * 0.114  + target.at<cv::Vec3b>(r, c)[1] * 0.587 + target.at<cv::Vec3b>(r, c)[2] * 0.299;
-            target_gray.at<cv::Vec3b>(r, c)[0] = gray;
-            target_gray.at<cv::Vec3b>(r, c)[1] = gray;
-            target_gray.at<cv::Vec3b>(r, c)[2] = gray;
+            for(int c = 0; c < target.cols; c++)
+            {
+                float gray = target.at<cv::Vec3b>(r, c)[0] * 0.114  + target.at<cv::Vec3b>(r, c)[1] * 0.587 + target.at<cv::Vec3b>(r, c)[2] * 0.299;
+                target_gray.at<cv::Vec3b>(r, c)[0] = gray;
+                target_gray.at<cv::Vec3b>(r, c)[1] = gray;
+                target_gray.at<cv::Vec3b>(r, c)[2] = gray;
+            }
         }
+        cv::cvtColor(target_gray, target_gray, cv::COLOR_BGR2GRAY);
     }
-    cv::cvtColor(target_gray, target_gray, cv::COLOR_BGR2GRAY);
 
     int histogram_source[256];
     int histogram_target[256];
@@ -593,11 +655,6 @@ void MainWindow::on_pushButtonHistogramMatching_clicked()
         HM[i] = findClosest(hist_cum_target_int, n, source_shade);
     }
 
-    // for (int i = 0; i < 255; i++)
-    // {
-    //    cout << HM[i] << endl;
-    // }
-
     cv::Mat source_matched = source_gray.clone();
 
     for(int r = 0; r < source_matched.rows; r++)
@@ -612,21 +669,6 @@ void MainWindow::on_pushButtonHistogramMatching_clicked()
     cv::imshow("Target grayscale image", target_gray);
     cv::imshow("Source grayscale image", source_gray);
     cv::waitKey(0);
-
-    // for(int r = 0; r < original.rows; r++)
-    // {
-    //    for(int c = 0; c < original.cols; c++)
-    //    {
-    //        modified.at<uint8_t>(r, c) = hist_cum[original.at<uint8_t>(r, c)];
-    //    }
-    // }
-    // ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_Grayscale8)));
-
-    // int arr[] = {1, 2, 4, 5, 6, 6, 8, 9};
-    // int n = sizeof(arr) / sizeof(arr[0]);
-    // cout << n << endl;
-    // int targetn = 11;
-    // cout << (findClosest(arr, n, targetn));
 }
 
 void MainWindow::on_spinBoxBrightness_valueChanged(int arg1)
@@ -635,7 +677,6 @@ void MainWindow::on_spinBoxBrightness_valueChanged(int arg1)
     extension = ui->lineEditReadImage->text();
 
     int brigthness = (int)arg1;
-    // cout << brigthness << endl;
 
     cv::Mat original = cv::imread(extension.toStdString());
     if (original.empty())
@@ -643,11 +684,7 @@ void MainWindow::on_spinBoxBrightness_valueChanged(int arg1)
         cout << "Image could not be found." << endl;
     }
 
-    cv::Mat modified = cv::imread(extension.toStdString());
-    if (modified.empty())
-    {
-        cout << "Image could not be found." << endl;
-    }
+    cv::Mat modified = original.clone();
 
     if (original.channels() == 3)
     {
@@ -735,7 +772,6 @@ void MainWindow::on_spinBoxContrast_valueChanged(int arg1)
     extension = ui->lineEditReadImage->text();
 
     int contrast = (int)arg1;
-    // cout << contrast << endl;
 
     cv::Mat original = cv::imread(extension.toStdString());
     if (original.empty())
@@ -743,11 +779,7 @@ void MainWindow::on_spinBoxContrast_valueChanged(int arg1)
         cout << "Image could not be found." << endl;
     }
 
-    cv::Mat modified = cv::imread(extension.toStdString());
-    if (modified.empty())
-    {
-        cout << "Image could not be found." << endl;
-    }
+    cv::Mat modified = original.clone();
 
     if (original.channels() == 3)
     {
@@ -825,11 +857,7 @@ void MainWindow::on_pushButtonNegative_clicked()
         cout << "Image could not be found." << endl;
     }
 
-    cv::Mat modified = cv::imread(extension.toStdString());
-    if (modified.empty())
-    {
-        cout << "Image could not be found." << endl;
-    }
+    cv::Mat modified = original.clone();
 
     if (original.channels() == 3)
     {
@@ -871,17 +899,8 @@ void MainWindow::on_pushButtonConvolution_clicked()
         cout << "Image could not be found." << endl;
     }
 
-    cv::Mat modified = cv::imread(extension.toStdString());
-    if (modified.empty())
-    {
-        cout << "Image could not be found." << endl;
-    }
-
-    cv::Mat filtered = cv::imread(extension.toStdString());
-    if (filtered.empty())
-    {
-        cout << "Image could not be found." << endl;
-    }
+    cv::Mat modified = original.clone();
+    cv::Mat filtered = original.clone();
 
     QString kernelName;
     kernelName = ui->lineEditGetKernelName->text();
@@ -1038,9 +1057,6 @@ void MainWindow::on_pushButtonConvolution_clicked()
         }
         cv::cvtColor(filtered, filtered, cv::COLOR_BGR2GRAY);
 
-        //cout << modified.channels() << endl;
-        //cout << original.channels() << endl;
-
         for(int y = 1; y < original.rows - 1; y++)
         {
             for(int x = 1; x < original.cols - 1; x++)
@@ -1085,15 +1101,8 @@ void MainWindow::on_pushButtonConvolution_clicked()
                 filtered.at<uint8_t>(y, x) = sum;
             }
         }
-        // cv::cvtColor(filtered, filtered, cv::COLOR_BGR2RGB);
         ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(filtered.data, filtered.cols, filtered.rows, filtered.step, QImage::Format_Grayscale8)));
     }
-
-    //cv::Mat test = filtered.clone();
-    //cv::imshow("test", test);
-    //cv::waitKey(0);
-
-    //float laplacian[3][3] = {{0, -1, 0}, {-1, 4, -1}, {0, -1, 0}};
 }
 
 void MainWindow::on_pushButtonRotateClockWise_clicked()
@@ -1192,10 +1201,6 @@ void MainWindow::on_pushButtonRotateAntiClockWise_clicked()
 
 void MainWindow::on_pushButtonZoomIn_clicked()
 {
-    // QString number;
-    // number = ui->lineEditQuantize->text();
-    // int n = number.toInt();
-
     QString extension;
     extension = ui->lineEditReadImage->text();
 
@@ -1237,7 +1242,6 @@ void MainWindow::on_pushButtonZoomIn_clicked()
         }
 
         cv::Mat modified1 = modified.clone();
-        // cv::imshow("mod", modified);
 
         for(int r = 0; r < modified.rows; r = r + 2)
         {
@@ -1248,8 +1252,6 @@ void MainWindow::on_pushButtonZoomIn_clicked()
                 modified1.at<cv::Vec3b>(r, c)[2] = modified.at<cv::Vec3b>(r, c - 1)[2] + (modified.at<cv::Vec3b>(r, c + 1)[2] - modified.at<cv::Vec3b>(r, c - 1)[2]) / 2;
             }
         }
-
-        // cv::imshow("mod1", modified1);
 
         cv::Mat modified2 = modified1.clone();
 
@@ -1262,7 +1264,6 @@ void MainWindow::on_pushButtonZoomIn_clicked()
                 modified2.at<cv::Vec3b>(r, c)[2] = modified1.at<cv::Vec3b>(r - 1, c)[2] + (modified1.at<cv::Vec3b>(r + 1, c)[2] - modified1.at<cv::Vec3b>(r - 1, c)[2]) / 2;
             }
         }
-
         cv::imshow("Zoom In", modified2);
         cv::waitKey(0);
     }
