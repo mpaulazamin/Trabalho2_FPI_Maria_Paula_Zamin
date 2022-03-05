@@ -1280,14 +1280,17 @@ void MainWindow::on_pushButtonZoomOut_clicked()
         cout << "Image could not be found." << endl;
     }
 
-    int sx = 5;
-    int sy = 5;
+    int sx = 20;
+    int sy = 20;
 
     int original_rows = original.rows;
     int original_cols = original.cols;
 
     int fit_rows = round(original_rows / sx);
     int fit_cols = round(original_cols / sy);
+
+    int n_rows = fit_rows / sx;
+    int n_cols = fit_cols / sy;
 
     int remain_rows  = original_rows - sx * fit_rows;
     int remain_cols = original_cols - sy * fit_cols;
@@ -1306,5 +1309,27 @@ void MainWindow::on_pushButtonZoomOut_clicked()
     if (modified.empty())
     {
         cout << "Image could not be found." << endl;
+    }
+
+    int r = 0;
+    int c = 0;
+
+    for (int i = 1; i <= new_rows; i++)
+    {
+        for (int j = 1; j <= new_cols; j++)
+        {
+            while (r < sx * i)
+            {
+                while (c < sy * i)
+                {
+                    // float meanB =
+                    c = c + 1;
+                }
+                c = c + sy;
+                r = r + 1;
+            }
+            r = r + sx;
+            // modified.at<cv::Vec3b>(i - 1, j - 1)[0] = meanB;
+        }
     }
 }
