@@ -219,10 +219,6 @@
           </property>
          </widget>
         </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QPushButton" name="pushButtonHistogram">
           <property name="text">
@@ -236,6 +232,20 @@
            <string>Histogram equalization</string>
           </property>
          </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Insert path to read target image</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditHistMatch"/>
         </item>
         <item>
          <widget class="QPushButton" name="pushButtonHistogramMatching">

@@ -484,17 +484,20 @@ void MainWindow::on_pushButtonHistogramEqualization_clicked()
 
 void MainWindow::on_pushButtonHistogramMatching_clicked()
 {
-    QString extension;
-    extension = ui->lineEditReadImage->text();
+    QString extension_source;
+    extension_source = ui->lineEditReadImage->text();
 
-    cv::Mat source = cv::imread(extension.toStdString());
+    cv::Mat source = cv::imread(extension_source.toStdString());
     if (source.empty())
     {
         cout << "Image could not be found." << endl;
     }
     cv::Mat source_gray = source.clone();
 
-    cv::Mat target = cv::imread("/home/ubuntu/fig.jpg");
+    QString extension_target;
+    extension_target = ui->lineEditHistMatch->text();
+
+    cv::Mat target = cv::imread(extension_target.toStdString());
     if (target.empty())
     {
         cout << "Image could not be found." << endl;
@@ -575,16 +578,40 @@ void MainWindow::on_pushButtonHistogramMatching_clicked()
     }
 
     int hist_cum_target_int[256];
+    int hist_cum_source_int[256];
+
     for(int i = 1; i < 255; i++)
     {
         hist_cum_target_int[i] = round(hist_cum_target[i]);
+        hist_cum_source_int[i] = round(hist_cum_source[i]);
     }
 
-    for (int shade_level = 0; shade_level < 255; shade_level++)
+    for (int i = 0; i < 255; i++)
     {
         int n = 255;
-        HM[shade_level] = findClosest(hist_cum_target_int, n, shade_level);
+        int source_shade = hist_cum_source_int[i];
+        HM[i] = findClosest(hist_cum_target_int, n, source_shade);
     }
+
+    // for (int i = 0; i < 255; i++)
+    // {
+    //    cout << HM[i] << endl;
+    // }
+
+    cv::Mat source_matched = source_gray.clone();
+
+    for(int r = 0; r < source_matched.rows; r++)
+    {
+        for(int c = 0; c < source_matched.cols; c++)
+        {
+            source_matched.at<uint8_t>(r, c) = HM[source_gray.at<uint8_t>(r, c)];
+        }
+    }
+    ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(source_matched.data, source_matched.cols, source_matched.rows, source_matched.step, QImage::Format_Grayscale8)));
+
+    cv::imshow("Target grayscale image", target_gray);
+    cv::imshow("Source grayscale image", source_gray);
+    cv::waitKey(0);
 
     // for(int r = 0; r < original.rows; r++)
     // {
