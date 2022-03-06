@@ -363,10 +363,14 @@ void MainWindow::on_pushButtonHistogram_clicked()
             cout << histogram[i] << endl;
         }
 
+        cout << "done" << endl;
+
         for(int i = 0; i < 255; i++)
         {
              cv::line(histImage, cv::Point(bin_w*(i), hist_height), cv::Point(bin_w*(i), hist_height - histogram[i]), cv::Scalar(0,0,0), 1, 8, 0);
         }
+
+        cout << "done" << endl;
 
         cv::imshow("Intensity Histogram", histImage);
         cv::waitKey();
@@ -935,7 +939,7 @@ void MainWindow::on_pushButtonConvolution_clicked()
     float n21 = vec21.toFloat();
     float n22 = vec22.toFloat();
 
-    float kernel[3][3] = {{n00, n01, n02}, {n10, n11, n12}, {n20, n21, n22}};
+    float kernel[3][3] = {{n22, n21, n20}, {n12, n11, n10}, {n02, n01, n00}};
 
     if(kernelName == "Gaussian")
     {
@@ -1126,29 +1130,55 @@ void MainWindow::on_pushButtonRotateClockWise_clicked()
     int new_width = original.size().height;
     int new_height = original.size().width;
 
-    QImage image = QImage(new_width, new_height, QImage::Format_RGB888);
-    image.fill(0);
-    image.save("/home/ubuntu/clockwise.jpg");
-
-    cv::Mat modified = cv::imread("/home/ubuntu/clockwise.jpg");
-    if (modified.empty())
+    if (original.channels() == 3)
     {
-        cout << "Image could not be found." << endl;
-    }
+        QImage image = QImage(new_width, new_height, QImage::Format_RGB888);
+        image.fill(0);
+        image.save("/home/ubuntu/clockwise.jpg");
 
-    if (modified.channels() == 3)
-    {
-        for(int i = 0; i < original.cols; i++)
+        cv::Mat modified = cv::imread("/home/ubuntu/clockwise.jpg");
+        if (modified.empty())
         {
-            for(int j = 0; j < original.rows; j++)
+            cout << "Image could not be found." << endl;
+        }
+
+        for(int c = 0; c < original.cols; c++)
+        {
+            for(int r = 0; r < original.rows; r++)
             {
-                modified.at<cv::Vec3b>(i, j)[0] = original.at<cv::Vec3b>(original.rows - 1 - j, i)[0];
-                modified.at<cv::Vec3b>(i, j)[1] = original.at<cv::Vec3b>(original.rows - 1 - j, i)[1];
-                modified.at<cv::Vec3b>(i, j)[2] = original.at<cv::Vec3b>(original.rows - 1 - j, i)[2];
+                modified.at<cv::Vec3b>(c, r)[0] = original.at<cv::Vec3b>(original.rows - 1 - r, c)[0];
+                modified.at<cv::Vec3b>(c, r)[1] = original.at<cv::Vec3b>(original.rows - 1 - r, c)[1];
+                modified.at<cv::Vec3b>(c, r)[2] = original.at<cv::Vec3b>(original.rows - 1 - r, c)[2];
             }
         }
+        cv::imshow("Rotated image", modified);
         cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
         ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_RGB888)));
+        cv::waitKey(0);
+    }
+
+    if (original.channels() == 1)
+    {
+        QImage image = QImage(new_width, new_height, QImage::Format_Grayscale8);
+        image.fill(0);
+        image.save("/home/ubuntu/clockwise.jpg");
+
+        cv::Mat modified = cv::imread("/home/ubuntu/clockwise.jpg");
+        if (modified.empty())
+        {
+            cout << "Image could not be found." << endl;
+        }
+
+        for(int c = 0; c < original.cols; c++)
+        {
+            for(int r = 0; r < original.rows; r++)
+            {
+                modified.at<uint8_t>(c, r) = original.at<uint8_t>(original.rows - 1 - r, c);
+            }
+        }
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_Grayscale8)));
+        cv::imshow("Rotated image", modified);
+        cv::waitKey(0);
     }
 }
 
@@ -1173,29 +1203,55 @@ void MainWindow::on_pushButtonRotateAntiClockWise_clicked()
     int new_width = original.size().height;
     int new_height = original.size().width;
 
-    QImage image = QImage(new_width, new_height, QImage::Format_RGB888);
-    image.fill(0);
-    image.save("/home/ubuntu/anticlockwise.jpg");
-
-    cv::Mat modified = cv::imread("/home/ubuntu/anticlockwise.jpg");
-    if (modified.empty())
+    if (original.channels() == 3)
     {
-        cout << "Image could not be found." << endl;
-    }
+        QImage image = QImage(new_width, new_height, QImage::Format_RGB888);
+        image.fill(0);
+        image.save("/home/ubuntu/anticlockwise.jpg");
 
-    if (modified.channels() == 3)
-    {
-        for(int i = 0; i < original.cols; i++)
+        cv::Mat modified = cv::imread("/home/ubuntu/anticlockwise.jpg");
+        if (modified.empty())
         {
-            for(int j = 0; j < original.rows; j++)
+            cout << "Image could not be found." << endl;
+        }
+
+        for(int c = 0; c < original.cols; c++)
+        {
+            for(int r = 0; r < original.rows; r++)
             {
-                modified.at<cv::Vec3b>(i, j)[0] = original.at<cv::Vec3b>(j, original.cols - 1 - i)[0];
-                modified.at<cv::Vec3b>(i, j)[1] = original.at<cv::Vec3b>(j, original.cols - 1 - i)[1];
-                modified.at<cv::Vec3b>(i, j)[2] = original.at<cv::Vec3b>(j, original.cols - 1 - i)[2];
+                modified.at<cv::Vec3b>(c, r)[0] = original.at<cv::Vec3b>(r, original.cols - 1 - c)[0];
+                modified.at<cv::Vec3b>(c, r)[1] = original.at<cv::Vec3b>(r, original.cols - 1 - c)[1];
+                modified.at<cv::Vec3b>(c, r)[2] = original.at<cv::Vec3b>(r, original.cols - 1 - c)[2];
             }
         }
+        cv::imshow("Rotated image", modified);
         cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
         ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_RGB888)));
+        cv::waitKey(0);
+    }
+
+    if (original.channels() == 1)
+    {
+        QImage image = QImage(new_width, new_height, QImage::Format_Grayscale8);
+        image.fill(0);
+        image.save("/home/ubuntu/anticlockwise.jpg");
+
+        cv::Mat modified = cv::imread("/home/ubuntu/anticlockwise.jpg");
+        if (modified.empty())
+        {
+            cout << "Image could not be found." << endl;
+        }
+
+        for(int c = 0; c < original.cols; c++)
+        {
+            for(int r = 0; r < original.rows; r++)
+            {
+                modified.at<uint8_t>(c, r) = original.at<uint8_t>(r, original.cols - 1 - c);
+            }
+        }
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_Grayscale8)));
+        cv::imshow("Rotated image", modified);
+        cv::waitKey(0);
     }
 }
 
@@ -1262,6 +1318,44 @@ void MainWindow::on_pushButtonZoomIn_clicked()
                 modified2.at<cv::Vec3b>(r, c)[0] = modified1.at<cv::Vec3b>(r - 1, c)[0] + (modified1.at<cv::Vec3b>(r + 1, c)[0] - modified1.at<cv::Vec3b>(r - 1, c)[0]) / 2;
                 modified2.at<cv::Vec3b>(r, c)[1] = modified1.at<cv::Vec3b>(r - 1, c)[1] + (modified1.at<cv::Vec3b>(r + 1, c)[1] - modified1.at<cv::Vec3b>(r - 1, c)[1]) / 2;
                 modified2.at<cv::Vec3b>(r, c)[2] = modified1.at<cv::Vec3b>(r - 1, c)[2] + (modified1.at<cv::Vec3b>(r + 1, c)[2] - modified1.at<cv::Vec3b>(r - 1, c)[2]) / 2;
+            }
+        }
+        cv::imshow("Zoom In", modified2);
+        cv::waitKey(0);
+    }
+
+    if(modified.channels() == 1)
+    {
+        int i = 0;
+
+        for(int r = 0; r < modified.rows; r = r + 2)
+        {
+            int j = 0;
+            for(int c = 0; c < modified.cols; c = c + 2)
+            {
+                modified.at<uint8_t>(r, c) = original.at<uint8_t>(i, j);
+                j = j + 1;
+            }
+            i = i + 1;
+        }
+
+        cv::Mat modified1 = modified.clone();
+
+        for(int r = 0; r < modified.rows; r = r + 2)
+        {
+            for(int c = 1; c <= modified.cols; c = c + 2)
+            {
+                modified1.at<uint8_t>(r, c) = modified.at<uint8_t>(r, c - 1) + (modified.at<uint8_t>(r, c + 1) - modified.at<uint8_t>(r, c - 1)) / 2;
+            }
+        }
+
+        cv::Mat modified2 = modified1.clone();
+
+        for(int r = 1; r <= modified1.rows; r = r + 2)
+        {
+            for(int c = 0; c < modified1.cols; c = c + 1)
+            {
+                modified2.at<uint8_t>(r, c) = modified1.at<uint8_t>(r - 1, c) + (modified1.at<uint8_t>(r + 1, c) - modified1.at<uint8_t>(r - 1, c)) / 2;
             }
         }
         cv::imshow("Zoom In", modified2);
