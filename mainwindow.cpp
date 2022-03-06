@@ -4,21 +4,20 @@
 using namespace std;
 using namespace cv;
 
-int getClosest(int val1, int val2, int target)
+int getClosest(int num1, int num2, int target)
 {
-    if (target - val1 >= val2 - target)
+    if (target - num1 >= num2 - target)
     {
-        return val2;
+        return num2;
     }
     else
     {
-        return val1;
+        return num1;
     }
 }
 
 int findClosest(int arr[], int n, int target)
 {
-    // Corner cases
     if (target <= arr[0])
     {
         return arr[0];
@@ -28,45 +27,37 @@ int findClosest(int arr[], int n, int target)
         return arr[n - 1];
     }
 
-    // Doing binary search
-    int i = 0, j = n, mid = 0;
+    int i = 0, j = n, half = 0;
 
     while (i < j)
     {
-        mid = (i + j) / 2;
+        half = (i + j) / 2;
 
-        if (arr[mid] == target)
+        if (arr[half] == target)
         {
-            return arr[mid];
+            return arr[half];
         }
 
-        // If target is less than array element, then search in left
-        if (target < arr[mid])
+        if (target < arr[half])
         {
-            // If target is greater than previous
-            // to mid, return closest of two
-            if (mid > 0 && target > arr[mid - 1])
+            if (half > 0 && target > arr[half - 1])
             {
-                return getClosest(arr[mid - 1], arr[mid], target);
+                return getClosest(arr[half - 1], arr[half], target);
             }
 
-            // Repeat for left half
-            j = mid;
+            j = half;
         }
 
-        // If target is greater than mid
         else
         {
-            if (mid < n - 1 && target < arr[mid + 1])
+            if (half < n - 1 && target < arr[half + 1])
             {
-                return getClosest(arr[mid], arr[mid + 1], target);
+                return getClosest(arr[half], arr[half + 1], target);
             }
-            // update i
-            i = mid + 1;
+            i = half + 1;
         }
     }
-    // Only single element left after search
-    return arr[mid];
+    return arr[half];
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -80,7 +71,6 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-
 
 void MainWindow::on_pushButtonDisplayImage_clicked()
 {
@@ -1392,8 +1382,8 @@ void MainWindow::on_pushButtonZoomOut_clicked()
     int new_rows = fit_rows + remain_rows;
     int new_cols = fit_cols + remain_cols;
 
-    cout << fit_rows << remain_rows << new_rows << endl;
-    cout << fit_cols << remain_cols << new_cols << endl;
+    // cout << fit_rows << remain_rows << new_rows << endl;
+    // cout << fit_cols << remain_cols << new_cols << endl;
 
     QImage image = QImage(new_rows, new_cols, QImage::Format_RGB888);
     image.fill(0);
@@ -1408,22 +1398,65 @@ void MainWindow::on_pushButtonZoomOut_clicked()
     int r = 0;
     int c = 0;
 
-    for (int i = 1; i <= new_rows; i++)
+    if (original.channels() == 3)
     {
-        for (int j = 1; j <= new_cols; j++)
+        for (int i = 1; i <= new_rows; i++)
         {
-            while (r < sx * i)
+            for (int j = 1; j <= new_cols; j++)
             {
-                while (c < sy * i)
+                while (r < sx * i)
                 {
-                    // float meanB =
-                    c = c + 1;
+                    float sumB;
+                    float sumG;
+                    float sumR;
+                    while (c < sy * i)
+                    {
+                        sumB = sumB + modified.at<cv::Vec3b>(r, c)[0];
+                        sumG = sumG + modified.at<cv::Vec3b>(r, c)[1];
+                        sumR = sumR + modified.at<cv::Vec3b>(r, c)[2];
+                        c = c + 1;
+                    }
+                    c = c + sy;
+                    r = r + 1;
+
+                    float meanB = sumB / (sx * sy);
+                    float meanG = sumG / (sx * sy);
+                    float meanR = sumR / (sx * sy);
+
+                    modified.at<cv::Vec3b>(i - 1, j - 1)[0] = (int)meanB;
+                    modified.at<cv::Vec3b>(i - 1, j - 1)[1] = (int)meanG;
+                    modified.at<cv::Vec3b>(i - 1, j - 1)[2] = (int)meanR;
                 }
-                c = c + sy;
-                r = r + 1;
+                r = r + sx;
             }
-            r = r + sx;
-            // modified.at<cv::Vec3b>(i - 1, j - 1)[0] = meanB;
         }
+        cv::cvtColor(modified, modified, cv::COLOR_BGR2RGB);
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_RGB888)));
+    }
+
+    if(original.channels() == 1)
+    {
+        for (int i = 1; i <= new_rows; i++)
+        {
+            for (int j = 1; j <= new_cols; j++)
+            {
+                while (r < sx * i)
+                {
+                    float sum;
+                    while (c < sy * i)
+                    {
+                        sum = sum + modified.at<uint8_t>(r, c);
+                        c = c + 1;
+                    }
+                    c = c + sy;
+                    r = r + 1;
+
+                    float mean = sum / (sx * sy);
+                    modified.at<uint8_t>(i - 1, j - 1) = (int)mean;
+                }
+                r = r + sx;
+            }
+        }
+        ui->displayNewImage->setPixmap(QPixmap::fromImage(QImage(modified.data, modified.cols, modified.rows, modified.step, QImage::Format_Grayscale8)));
     }
 }
